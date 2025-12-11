@@ -1,8 +1,8 @@
 import React from 'react';
-import { useChatStore } from '../store/chatStore';
+import { useChatStore, Thread } from '../store/chatStore';
 
 interface ChatPanelProps {
-  thread: any;
+  thread: Thread;
 }
 
 export default function ChatPanel({ thread }: ChatPanelProps) {
@@ -11,6 +11,9 @@ export default function ChatPanel({ thread }: ChatPanelProps) {
 
   return (
     <div className="flex-1 overflow-y-auto p-6 space-y-4">
+      <div className="border-b border-gray-200 pb-3 mb-4">
+        <h3 className="text-lg font-semibold truncate">{thread.title}</h3>
+      </div>
       {threadMessages.length === 0 ? (
         <div className="text-center text-gray-500">
           Nenhuma mensagem ainda. Comece descrevendo seu caso.

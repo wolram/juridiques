@@ -1,13 +1,15 @@
 import React from 'react';
 import { MessageCircle, Plus, Archive, Share2 } from 'lucide-react';
-import { useChatStore } from '../store/chatStore';
+import { useChatStore, Thread } from '../store/chatStore';
 
 interface ThreadSidebarProps {
   open: boolean;
   onToggle: () => void;
+  onSelect?: (thread: Thread) => void;
+  onCreate?: () => void;
 }
 
-export default function ThreadSidebar({ open, onToggle }: ThreadSidebarProps) {
+export default function ThreadSidebar({ open, onToggle, onSelect, onCreate }: ThreadSidebarProps) {
   const { threads } = useChatStore();
 
   if (!open) return null;
@@ -28,6 +30,7 @@ export default function ThreadSidebar({ open, onToggle }: ThreadSidebarProps) {
           <div
             key={thread.id}
             className="p-3 hover:bg-gray-100 rounded-lg cursor-pointer group"
+            onClick={() => onSelect?.(thread)}
           >
             <div className="flex items-start justify-between">
               <div className="flex-1 flex gap-2">
@@ -52,7 +55,10 @@ export default function ThreadSidebar({ open, onToggle }: ThreadSidebarProps) {
 
       {/* New thread button */}
       <div className="p-4 border-t border-gray-200">
-        <button className="w-full flex items-center gap-2 bg-red-600 text-white p-2 rounded-lg hover:bg-red-700">
+        <button
+          onClick={() => onCreate?.()}
+          className="w-full flex items-center gap-2 bg-red-600 text-white p-2 rounded-lg hover:bg-red-700"
+        >
           <Plus size={18} />
           <span>Nova thread</span>
         </button>

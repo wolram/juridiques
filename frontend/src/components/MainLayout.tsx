@@ -1,28 +1,37 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { Send, Upload, Settings, Menu } from 'lucide-react';
 import ChatPanel from './ChatPanel';
 import ThreadSidebar from './ThreadSidebar';
-import { useChatStore } from '../store/chatStore';
+import { useChatStore, Thread } from '../store/chatStore';
 
 export default function MainLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [currentThread, setCurrentThread] = useState(null);
+  const [currentThread, setCurrentThread] = useState<Thread | null>(null);
   const [input, setInput] = useState('');
-  const [selectedFile, setSelectedFile] = useState(null);
-  const fileInputRef = useRef(null);
-  const { addMessage, threads } = useChatStore();
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const { addMessage, addThread, threads } = useChatStore();
+  const handleSelectThread = (t: Thread) => setCurrentThread(t);
+  const handleCreateThread = (title?: string) => {
+    const newThread: Thread = { id: Date.now(), title: title ?? 'Nova thread' };
+    addThread(newThread);
+    setCurrentThread(newThread);
+  };
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
-
-    // Criar thread se não existir
-    if (!currentThread) {
-      setCurrentThread({ id: Date.now(), title: input.substring(0, 50) });
+    // Criar thread se não existir (e registrar no store)
+    let thread = currentThread;
+    if (!thread) {
+      const newThread: Thread = { id: Date.now(), title: input.substring(0, 50) };
+      addThread(newThread);
+      setCurrentThread(newThread);
+      thread = newThread;
     }
 
     // Adicionar mensagem do usuário
-    addMessage(currentThread?.id, {
+    addMessage(thread.id, {
       role: 'user',
       content: input,
       sources: [],
@@ -36,7 +45,12 @@ export default function MainLayout() {
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
-      <ThreadSidebar open={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
+        <ThreadSidebar
+          open={sidebarOpen}
+          onToggle={() => setSidebarOpen(!sidebarOpen)}
+          onSelect={handleSelectThread}
+          onCreate={() => handleCreateThread()}
+        />
 
       {/* Main area */}
       <div className="flex-1 flex flex-col">
@@ -82,7 +96,7 @@ export default function MainLayout() {
                 type="file"
                 multiple
                 className="hidden"
-                onChange={(e) => setSelectedFile(e.target.files?.[0])}
+                onChange={(e) => setSelectedFile(e.target.files?.[0] ?? null)}
               />
               <input
                 type="text"

@@ -2,13 +2,13 @@
 
 import { create } from 'zustand';
 
-interface Message {
+export interface Message {
   role: 'user' | 'assistant';
   content: string;
   sources?: string[];
 }
 
-interface Thread {
+export interface Thread {
   id: number;
   title: string;
   cnj?: string;
